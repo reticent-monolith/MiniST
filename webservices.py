@@ -28,6 +28,8 @@ class WsConnection:
         }
         req = st.Request()
         req.update(query)
+
+        
         return self.api.process(req)
 
     def account_check(self):
