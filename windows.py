@@ -20,10 +20,28 @@ def menu():
 
 def transaction_query(ws):
 
-    layout = [
-        [sg.Text("Site Reference"), sg.Input("test_benjonesthesecond84082", key="site_ref", size=(20, 1))],
+    filter_choices = ["sitereference",
+                      "transactionreference (Alpha 25 char)", 
+                      "accounttypedescription (Alpha 20 char)",
+                      "starttimestamp (YYYY-MM-DD HH:MM:SS)",
+                      "endtimestamp (YYYY-MM-DD HH:MM:SS)",
+                      "parenttransactionreference",
+                      "paymenttypedescription",
+                      "requesttypedescription",
+                      "pan"
+                      ]
 
-        [sg.Text("Transaction Reference"), sg.Input(key="transaction_ref", size=(20, 1))],
+    layout = [
+        [sg.Combo(filter_choices, key="field_0"), sg.Input(key="value_0", size=(20, 1))],
+        [sg.Combo(filter_choices, key="field_1"), sg.Input(key="value_1", size=(20, 1))],
+        [sg.Combo(filter_choices, key="field_2"), sg.Input(key="value_2", size=(20, 1))],
+        [sg.Combo(filter_choices, key="field_3"), sg.Input(key="value_3", size=(20, 1))],
+        [sg.Combo(filter_choices, key="field_4"), sg.Input(key="value_4", size=(20, 1))],
+        [sg.Combo(filter_choices, key="field_5"), sg.Input(key="value_5", size=(20, 1))],
+        [sg.Combo(filter_choices, key="field_6"), sg.Input(key="value_6", size=(20, 1))],
+        [sg.Combo(filter_choices, key="field_7"), sg.Input(key="value_7", size=(20, 1))],
+
+        [sg.Output(key="_output_", size=(80,20))],
 
         [sg.Button("Run Query")]
     ]

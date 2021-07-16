@@ -17,14 +17,14 @@ class WsConnection:
     api = st.securetrading.Api(stconfig)    
     
     
-    def transaction_query(self, filter):
+    def transaction_query(self, trx_filter):
         """
         Process a TRANSACTIONQUERY with the supplied 
         filter and return the response
         """
         query = {
             "requesttypedescriptions": ["TRANSACTIONQUERY"],
-            "filter": filter
+            "filter": trx_filter
         }
         req = st.Request()
         req.update(query)
