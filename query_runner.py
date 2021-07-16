@@ -19,7 +19,6 @@ def gui():
     while True:
         # create main menu
         menu_event, menu_values = menu.read()
-        print(menu_values)
         # create connection to webservices
         ws = WsConnection(menu_values["WS_USER"], menu_values["WS_PASS"])
         
@@ -31,17 +30,17 @@ def gui():
         elif menu_event== "TRANSACTIONQUERY" and not tq_active:
             tq_active = True
             menu.Hide()
-            tq = windows.transaction_query(ws)
+            tq = windows.transaction_query(menu_values["WS_USER"])
             while True:
                 tq_event, tq_values = tq.read()
-                if tq_event == sg.WIN_CLOSED:
+                if tq_event in (sg.WIN_CLOSED, "Back"):
                     tq.close()
                     tq_active = False
                     menu.UnHide()
                     break
                 if tq_event == "Run Query":
                     tq.FindElement('_output_').Update('')
-                    query_filter = map_values_to_filter(tq_values)
+                    query_filter = map_values_to_dict(tq_values)
                     # Stupid python tuples and their stupid comma...
                     query = Thread(target=run_transaction_query, args=(ws, query_filter), daemon=True)
                     query.start()
@@ -65,11 +64,11 @@ def run_transaction_query(ws, query_filter):
 ### Helper Functions ###
 ########################
 
-def map_values_to_filter(in_values):
+def map_values_to_dict(in_values):
     """
     @param values: dict of field_n to choice and value_n to input
     """
-    query_filter = dict()
+    output = dict()
     fields = ['']*8
     values = ['']*8
 
@@ -82,6 +81,7 @@ def map_values_to_filter(in_values):
             if "value_" in k:
                 # adjust value to dict
                 values[int(k.split("_")[1])] = {"value" : v}
+
     # Map fields to their respective values, except if field contains input but value is blank
     fields = [f for f in fields if f != '']
     values = [v for v in values if v != '']
@@ -91,11 +91,11 @@ def map_values_to_filter(in_values):
     fields = set()
     for pair in zipped:
         if pair[0] not in fields:
-            query_filter[pair[0]] = [pair[1]]
+            output[pair[0]] = [pair[1]]
             fields.add(pair[0])
         else:
-            query_filter[pair[0]].append(pair[1])
-    return query_filter
+            output[pair[0]].append(pair[1])
+    return output
 
 
 ############

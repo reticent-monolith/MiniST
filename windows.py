@@ -7,7 +7,7 @@ def menu():
         [sg.Text("Username"), sg.Input(
             "ben_webservices", key="WS_USER", size=(20, 1))],
         [sg.Text("Password"), sg.Input(
-            "BenPass123!", key="WS_PASS", size=(20, 1))],
+            "BenPass123!", key="WS_PASS", size=(20, 1), password_char="*")],
         [sg.Text("What would you like to do?")],
         [sg.Button('TRANSACTIONQUERY')],
         [sg.Button('TRANSACTIONUPDATE')],
@@ -18,7 +18,7 @@ def menu():
 
 
 
-def transaction_query(ws):
+def transaction_query(user):
 
     filter_choices = ["sitereference",
                       "transactionreference (Alpha 25 char)", 
@@ -43,10 +43,10 @@ def transaction_query(ws):
 
         [sg.Output(key="_output_", size=(80,20))],
 
-        [sg.Button("Run Query")]
+        [sg.Button("Run Query"), sg.Button("Back")]
     ]
 
-    return sg.Window("TRANSACTIONQUERY", layout, modal=True)
+    return sg.Window(f"TRANSACTIONQUERY for {user}", layout, modal=True)
 
 
 
