@@ -1,8 +1,8 @@
 #!/usr/bin/python
-from webservices import WsConnection 
+from lib.webservices import WsConnection 
 import PySimpleGUI as sg   
 from threading import Thread
-import windows
+import lib.windows as windows
 
 
 
