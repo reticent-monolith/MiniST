@@ -12,22 +12,31 @@ import lib.windows as windows
 
 def gui():
     """
-    Main GUI thread. DO NOT RUN PYSIMPLEGUI OUTSIDE OF THIS THREAD
+    Main GUI thread.
     """
+
+    # Flags for secondary window states
     tq_active = False
+
+    # Create the main menu window
     menu = windows.menu()
     while True:
         # create main menu
         menu_event, menu_values = menu.read()
+
         # create connection to webservices
         ws = WsConnection(menu_values["WS_USER"], menu_values["WS_PASS"])
         
         # this will close the entire program
         if menu_event in ("Quit", sg.WIN_CLOSED):
             break
+        # save credentials   
+        # TODO make this work! No idea why it isn't... 
+        elif menu_event == "Save":
+            save_creds(menu_values["WS_USER"], menu_values["WS_PASS"])
 
         # handle the transactionquery window
-        elif menu_event== "TRANSACTIONQUERY" and not tq_active:
+        elif menu_event== "Transaction Query" and not tq_active:
             tq_active = True
             menu.Hide()
             tq = windows.transaction_query(menu_values["WS_USER"])
@@ -38,12 +47,19 @@ def gui():
                     tq_active = False
                     menu.UnHide()
                     break
-                if tq_event == "Run Query":
+                elif tq_event == "Clear":
+                    for el in list(tq.element_list()):
+                        if isinstance(el, sg.Input) or isinstance(el, sg.Combo):
+                            el.update("")
+                elif tq_event == "Run Query":
                     tq.FindElement('_output_').Update('')
                     query_filter = map_values_to_dict(tq_values)
-                    # Stupid python tuples and their stupid comma...
-                    query = Thread(target=run_transaction_query, args=(ws, query_filter), daemon=True)
+                    query = Thread(target=run_transaction_query, args=(ws, query_filter, tq), daemon=True)
                     query.start()
+                elif tq_event == "-TQ_THREAD-":
+                    tq["_status_"].update(tq_values[tq_event])
+
+    # Close the window                    
     menu.close()
 
 
@@ -52,12 +68,27 @@ def gui():
 ### API Functions ###
 #####################
 
-def run_transaction_query(ws, query_filter):
+def run_transaction_query(ws, query_filter, window):
     """
     Run a transaction query
     """
+    window.write_event_value("-TQ_THREAD-", "Running...")
+
     result = ws.transaction_query(query_filter)
-    print(result)
+    if result['responses'][0]['errorcode'] != "0":
+        window.write_event_value("-TQ_THREAD-", "Error!")
+    else: # Successful response from API
+        window.write_event_value("-TQ_THREAD-", "Successful!")
+    count = 0
+    if "records" in result['responses'][0].keys():
+        for record in result['responses'][0]['records']:
+            count += 1
+            print(f"#### Record {count} ####")
+            for k,v in record.items():
+                print(f"{k}: {v}")
+            print()
+    
+    
 
 
 ########################
@@ -97,11 +128,14 @@ def map_values_to_dict(in_values):
             output[pair[0]].append(pair[1])
     return output
 
+def save_creds(user, password):
+    with open(".env", "w") as file:
+        file.write(f"WS_USER=\"{user}\"\n")
+        file.write(f"WS_PASS=\"{password}\"\n")
 
 ############
 ### Main ###
 ############
-
 
 def main():
     gui()
