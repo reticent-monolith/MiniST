@@ -2,7 +2,7 @@ import PySimpleGUI as sg
 
 sg.theme("GreenMono")
 
-class Menu:
+def menu():
     layout = [
         [sg.Text("Username"), sg.Input(
             "ben_webservices", key="WS_USER", size=(20, 1))],
@@ -14,13 +14,11 @@ class Menu:
         [sg.Button('REFUND')],
         [sg.Button("Quit")]
     ]
-    window = sg.Window("TrustPayments Merchant Query Runner", layout)
+    return sg.Window("MiniST", layout)
 
 
 
-class TransactionQuery:
-    def __init__(self, ws):
-        self.ws = ws
+def transaction_query(ws):
 
     layout = [
         [sg.Text("Site Reference"), sg.Input("test_benjonesthesecond84082", key="site_ref", size=(20, 1))],
@@ -30,14 +28,8 @@ class TransactionQuery:
         [sg.Button("Run Query")]
     ]
 
-    window = sg.Window("TRANSACTIONQUERY", layout, modal=True)
-    active = False
+    return sg.Window("TRANSACTIONQUERY", layout, modal=True)
 
-    def run_transaction_query(self, siteref):
-        query = self.ws.transaction_query(
-            {
-                "sitereference": [{"value": siteref}],
-                "currencyiso3a": [{"value": "GBP"}]
-            }
-        )
-        print(query)
+
+
+
