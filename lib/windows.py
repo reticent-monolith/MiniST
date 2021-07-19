@@ -45,9 +45,9 @@ def transaction_query(user):
                       ]
     layout = [
         [sg.Combo(filter_choices, key="field_0"),
-         sg.Input(key="value_0", size=(30, 1))],
+         sg.Input("test_benjonesthesecond84082",key="value_0", size=(30, 1))], #TODO remove placeholder siteref
         [sg.Combo(filter_choices, key="field_1"),
-         sg.Input(key="value_1", size=(30, 1))],
+         sg.Input("4000000000001067", key="value_1", size=(30, 1))], #TODO remove placeholder pan
         [sg.Combo(filter_choices, key="field_2"),
          sg.Input(key="value_2", size=(30, 1))],
         [sg.Combo(filter_choices, key="field_3"),
@@ -73,8 +73,7 @@ def refund(user, transactions):
     """
     Layout of the refund window
     """
-    headings = ["Reference", "DateTime     ", "Amount", "Status", "Type"]
-    headings = [x.ljust(15) for x in headings]
+    headings = [x.ljust(15) for x in ["Reference", "DateTime     ", "Amount", "Status", "Type"]]
     trxs = transactions.get()
     layout = [
         #TODO remove the placeholder siteref
@@ -92,7 +91,7 @@ def refund(user, transactions):
             change_submits=True
         )],
         [sg.Button("Refund"), sg.Button("Refund All")],
-        [sg.Output(size=(100, 30), key="-refund_result-")],
+        [sg.Output(size=(100, 10), key="-refund_result-")],
         [sg.Text("Idle", key="_status_", size=(50, 1))]
     ]
     return sg.Window(f"Refunds for {user}", layout, modal=True)
