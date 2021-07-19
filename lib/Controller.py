@@ -28,4 +28,11 @@ class Controller:
         Run multiple refunds and return a dictionary of successful and failed refunds
         """
         window.write_event_value("-REFUND_THREAD-", "Running...")
+        print(f"transaction list going into run_refund: {transaction_list}")
+        
+        refunds = []
+        for t in transaction_list:
+            refunds.append(ws.refund(t))
+        
+        print(f"Refunds: {refunds}")
 

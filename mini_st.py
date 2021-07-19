@@ -110,13 +110,21 @@ class MiniST:
         win = windows.refund(menu_values["WS_USER"], self.storage.transactions)
         while True:
             e, v = win.read()
+            print(v)
             if e in (sg.WIN_CLOSED, "Back"):
                 win.close()
                 self.windows["refund"] = False
                 break
             elif e == "Refund":
                 Thread(target=controller.run_refund,
-                       args=(self.ws, self.storage.transactions), daemon=True).start()
+                       args=(self.ws, self.storage.transactions, win), daemon=True).start()
+            elif e == "-TQ_THREAD-":
+                # Handle messages from the thread
+                win["_status_"].update(v[e])
+                # If the message is 'Successful!' then print the db
+                if v[e] == "Successful!":
+                    # TODO improve display here
+                    print(self.storage.transactions[0].body)
 
 
 ############
