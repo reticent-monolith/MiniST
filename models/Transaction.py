@@ -7,7 +7,6 @@ class Transaction:
     def __init__(self, data):
         # Build dictionary of fields and values
         self.body = data
-        print(f"Creating Transaction: {data}")
         try:
             self.site = data["sitereference"]
             self.ref = data["transactionreference"]

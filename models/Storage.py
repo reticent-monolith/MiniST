@@ -12,7 +12,7 @@ class Storage:
     def add(self, transaction):
         self.transactions.append(transaction)
 
-    def remove(self, transaction): # TODO check if this actually works without python moaning about the list changing size
+    def remove(self, transaction): 
         for t in self.transactions:
             if t.ref == transaction.ref:
                 del t

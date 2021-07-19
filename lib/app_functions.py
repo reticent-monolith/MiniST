@@ -3,10 +3,14 @@ The functions which the gui uses to operate on the transaction
 storage and use the secure trading api.
 """
 
+from PySimpleGUI.PySimpleGUI import Window
+from models.Storage import Storage
 from models.Transaction import Transaction
+from lib.Webservices import WsConnection
+from lib.helpers import *
 
 
-def save_creds(user, password):
+def save_creds(user: str, password: str):
     """
     Save credentials to the .env file for ease of use
     """
@@ -15,7 +19,7 @@ def save_creds(user, password):
         file.write(f"WS_PASS=\"{password}\"\n")
 
 
-def run_transaction_query(ws, query_filter, window, storage):
+def run_transaction_query(ws: WsConnection, query_filter: dict, window: Window, storage: Storage):
     """
     Run a transaction query and add the records to the storage
     """
@@ -34,12 +38,12 @@ def run_transaction_query(ws, query_filter, window, storage):
             storage.add(Transaction(record))
 
 
-def run_refund(ws, storage, window, elements):
+def run_refund(ws: WsConnection, storage: Storage, window: Window, elements: list):
     """
     Run multiple refunds and print the result
     """
-    #TODO refactor this mess...
     storage = storage.get()
+    # Prepare the selected transactions of refund
     to_refund = []
     if elements == "all":
         to_refund = storage
@@ -47,33 +51,27 @@ def run_refund(ws, storage, window, elements):
         for i in elements:
             to_refund.append(storage[int(i)])
     window.write_event_value("-REFUND_THREAD-", "Running...")
-
+    # Process the refunds via the api
     refunds = []
     for t in to_refund:
         result = ws.refund(t)
         refunds.append(result)
+        print(f"Refunding {t.ref}:\n {result}")
+        # If the refund was successful, remove the transaction from storage
         if result['responses'][0]['errorcode'] == "0":
             storage.remove(t)
             # Update the table with the new storage
-            #TODO this needs to be a function now...
-            for_refund = []
-            for t in storage:
-                for_refund.append([t.body["transactionreference"],
-                                t.body["transactionstartedtimestamp"], t.body["baseamount"]])
-            values = for_refund if len(for_refund) > 0 else [
-                ['' for row in range(20)]for col in range(3)]
-            window["-table-"].update(values=values)
+            window["-table-"].update(values=get_table_values(storage))
+    window.write_event_value("-REFUND_THREAD-", "Done")
+    
 
-    print(f"Refunds: {refunds}")
-
-
-def add_to_storage(ws, storage, site, ref, window):
+def add_to_storage(ws: WsConnection, storage: Storage, site: str, ref: str, window: Window):
     """
     Find a transaction using transaction query and add it to the storage
     """
     transaction = ws.transaction_query({
-        "sitereference": [{"value": site}],
-        "transactionreference": [{"value": ref}]
+        "sitereference": [{"value": site.strip()}],
+        "transactionreference": [{"value": ref.strip()}]
     })
     try:
         storage.add(Transaction(transaction["responses"][0]["records"][0]))
@@ -81,11 +79,7 @@ def add_to_storage(ws, storage, site, ref, window):
         print("Invalid response from gateway")
         return
     # Update the table with the new storage
-    for_refund = []
-    trxs = storage.get()
-    for t in trxs:
-        for_refund.append([t.body["transactionreference"],
-                          t.body["transactionstartedtimestamp"], t.body["baseamount"]])
-    values = for_refund if len(for_refund) > 0 else [
-        ['' for row in range(20)]for col in range(3)]
-    window["-table-"].update(values=values)
+    window["-table-"].update(values=get_table_values(storage.get()))
+
+
+

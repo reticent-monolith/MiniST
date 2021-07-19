@@ -24,13 +24,10 @@ class MiniST:
             "auth": False,
             "account check": False
         }
-
         # Create the main menu window
         self.menu = windows.menu()
-
         # Attach the database
         self.storage = storage
-
         # Start the GUI loop
         self.run()
 
@@ -58,16 +55,15 @@ class MiniST:
                 self.menu.Hide()
                 self.open_transaction_query_window(menu_values)
                 self.windows["transaction query"] = False
+                print(self.storage.get())
                 self.menu.UnHide()
             # handle the refund window
             elif menu_event == "Refund" and not self.windows["refund"]:
                 self.windows["refund"] = True
                 self.menu.Hide()
-                print(self.storage.get())
                 self.open_refund_window(menu_values)
                 self.windows["refund"] = False
                 self.menu.UnHide()
-
         # Close the window
         self.menu.close()
 
@@ -100,7 +96,8 @@ class MiniST:
                 # If the message is 'Successful!' then print the db
                 if values[event] == "Successful!":
                     # TODO improve display here
-                    print(self.storage.transactions[0].body)
+                    for t in self.storage.get():
+                        print(t.body)
 
     def open_refund_window(self, menu_values):
         """
@@ -108,6 +105,7 @@ class MiniST:
         """
         window = windows.refund(menu_values["WS_USER"], self.storage)
         while True:
+
             event, values = window.read()
             if event in (sg.WIN_CLOSED, "Back"):
                 window.close()
@@ -115,23 +113,28 @@ class MiniST:
             if event == "Add":
                 if values["-input_ref-"] != "" and values["-input_site-"] != "":
                     Thread(target=add_to_storage,
-                        args=(self.ws, self.storage,
-                                values["-input_site-"], values["-input_ref-"], window),
-                        daemon=True).start()
+                           args=(self.ws, self.storage,
+                                 values["-input_site-"], values["-input_ref-"], window),
+                           daemon=True).start()
+                    window["-input_ref-"].update("")
                 else:
-                    print("No data entered")
+                    print("ERROR: No data entered")
             elif event == "Refund":
                 if len(values["-table-"]) > 0:
                     Thread(target=run_refund,
-                        args=(self.ws, self.storage, window, values["-table-"]),
-                        daemon=True).start()
+                           args=(self.ws, self.storage,
+                                 window, values["-table-"]),
+                           daemon=True).start()
                 else:
-                    print("Select at least one transaction")
+                    print("ERROR: Select at least one transaction")
             elif event == "Refund All":
                 if len(values["-table-"]) > 0:
                     Thread(target=run_refund,
-                        args=(self.ws, self.storage, window, "all"),
-                        daemon=True).start()
+                           args=(self.ws, self.storage, window, "all"),
+                           daemon=True).start()
+            elif event == "-REFUND_THREAD-":
+                if values["-REFUND_THREAD-"] == "Done":
+                    print("\nRefunds processed. If any of the selected transactions are left in the table, they failed. Check to ensure a refund is possible on them")
 
 
 ############

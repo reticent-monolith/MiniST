@@ -2,6 +2,8 @@ import PySimpleGUI as sg
 from dotenv import load_dotenv
 import os
 
+from lib.helpers import get_table_values
+
 load_dotenv()
 USER = os.environ.get("WS_USER")
 PASS = os.environ.get("WS_PASS")
@@ -71,35 +73,26 @@ def refund(user, transactions):
     """
     Layout of the refund window
     """
-    headings = ["Reference", "DateTime", "Amount"]
-    for_refund = []
+    headings = ["Reference", "DateTime     ", "Amount", "Status", "Type"]
+    headings = [x.ljust(15) for x in headings]
     trxs = transactions.get()
-    for t in trxs:
-        for_refund.append([t.body["transactionreference"],
-                          t.body["transactionstartedtimestamp"], t.body["baseamount"]])
-    # Handle an empty storage
-    values = for_refund if len(for_refund) > 0 else [
-        ['' for row in range(20)]for col in range(3)]
     layout = [
-        [sg.Text("sitereference"), sg.Input(size=(30, 1), key="-input_site-")],
+        #TODO remove the placeholder siteref
+        [sg.Text("sitereference"), sg.Input("test_benjonesthesecond84082",size=(30, 1), key="-input_site-")],
         [sg.Text("transactionreference"), sg.Input(
             size=(30, 1), key="-input_ref-")],
         [sg.Button("Add")],
         [sg.Table(
             key="-table-",
-            values=values,
+            values=get_table_values(trxs),
             headings=headings,
-            def_col_width=60,
-            max_col_width=60,
-            # auto_size_columns=True,
             justification='center',
-            # alternating_row_color='lightblue',
             num_rows=max(len(trxs), 20),
             enable_events=True,
             change_submits=True
         )],
         [sg.Button("Refund"), sg.Button("Refund All")],
-        [sg.Output(size=(50, 8), key="-refund_result-")],
+        [sg.Output(size=(100, 30), key="-refund_result-")],
         [sg.Text("Idle", key="_status_", size=(50, 1))]
     ]
     return sg.Window(f"Refunds for {user}", layout, modal=True)

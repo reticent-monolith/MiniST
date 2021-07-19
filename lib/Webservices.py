@@ -11,7 +11,7 @@ class WsConnection:
     stconfig = st.Config()
 
     # Add auth information for the connection
-    def __init__(self, user, password):
+    def __init__(self, user: str, password: str):
         self.stconfig.username = user
         self.stconfig.password = password
 

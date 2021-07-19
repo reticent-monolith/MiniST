@@ -34,3 +34,25 @@ def map_values_to_dict(in_values):
         else:
             output[pair[0]].append(pair[1])
     return output
+
+
+def get_table_values(transactions: list) -> list:
+    """
+    Returns a list of rows for the refund table, or an empty list if there are no
+    transactions in storage
+    """
+    for_refund = []
+    for t in transactions:
+        try:
+            if t.body["requesttypedescription"] == "AUTH":
+                for_refund.append([t.body["transactionreference"],
+                                t.body["transactionstartedtimestamp"], 
+                                t.body["baseamount"],
+                                t.body["settlestatus"],
+                                t.body["requesttypedescription"],
+                                ])
+        except:
+            pass #TODO What shoudl happn here?
+    
+    return for_refund if len(for_refund) > 0 else [
+        ['' for row in range(20)]for col in range(5)]
