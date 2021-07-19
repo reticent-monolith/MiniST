@@ -6,6 +6,7 @@ import PySimpleGUI as sg
 from threading import Thread
 import lib.windows as windows
 import lib.helpers as h
+import pprint
 
 
 class MiniST:
@@ -85,7 +86,7 @@ class MiniST:
             elif event == "Run Query":
                 # clear the output
                 window.FindElement('_output_').Update('')
-                # contruct the filter for the query
+                # construct the filter for the query
                 query_filter = h.map_values_to_dict(values)
                 # Run the query in a new thread
                 Thread(target=run_transaction_query,
@@ -95,9 +96,12 @@ class MiniST:
                 window["_status_"].update(values[event])
                 # If the message is 'Successful!' then print the db
                 if values[event] == "Successful!":
-                    # TODO improve display here
+                    count = 0
                     for t in self.storage.get():
-                        print(t.body)
+                        count += 1
+                        print(f"### Transaction {count} ###\n")
+                        pprint.pprint(t.body)
+                        print()
 
     def open_refund_window(self, menu_values):
         """
@@ -105,7 +109,6 @@ class MiniST:
         """
         window = windows.refund(menu_values["WS_USER"], self.storage)
         while True:
-
             event, values = window.read()
             if event in (sg.WIN_CLOSED, "Back"):
                 window.close()
@@ -134,8 +137,12 @@ class MiniST:
                            daemon=True).start()
             elif event == "-REFUND_THREAD-":
                 if values["-REFUND_THREAD-"] == "Done":
-                    print("\nRefunds processed. If any of the selected transactions are left in the table, they failed. Check to ensure a refund is possible on them")
-
+                    print("\nRefunds processed. If any of the selected transactions are left in the table, "
+                          "they failed. Check to ensure a refund is possible on them")
+            elif event == "View":
+                selected = values["-table-"]
+                if len(selected) > 0:
+                    sg.popup(pprint.pformat(self.storage.get()[int(selected[0])].body))
 
 ############
 ### Main ###

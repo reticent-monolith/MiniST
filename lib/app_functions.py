@@ -1,5 +1,5 @@
 """
-The functions which the gui uses to operate on the transaction 
+The functions the gui uses to operate on the transaction
 storage and use the secure trading api.
 """
 
@@ -7,7 +7,6 @@ from PySimpleGUI.PySimpleGUI import Window
 from models.Storage import Storage
 from models.Transaction import Transaction
 from lib.Webservices import WsConnection
-from lib.helpers import *
 
 
 def save_creds(user: str, password: str):
@@ -29,6 +28,7 @@ def run_transaction_query(ws: WsConnection, query_filter: dict, window: Window, 
     storage.clear()
     result = ws.transaction_query(query_filter)
     if result['responses'][0]['errorcode'] != "0":
+        print(result)
         window.write_event_value("-TQ_THREAD-", "Error!")
     else:  # Successful response from API
         window.write_event_value("-TQ_THREAD-", "Successful!")
@@ -46,7 +46,7 @@ def run_refund(ws: WsConnection, storage: Storage, window: Window, elements: lis
     # Prepare the selected transactions of refund
     to_refund = []
     if elements == "all":
-        to_refund = storage
+        to_refund = [x for x in storage if (x["settlestatus"] == "100" and x["requesttypedescription"] == "AUTH")]
     else:
         for i in elements:
             to_refund.append(storage[int(i)])
@@ -61,7 +61,7 @@ def run_refund(ws: WsConnection, storage: Storage, window: Window, elements: lis
         if result['responses'][0]['errorcode'] == "0":
             storage.remove(t)
             # Update the table with the new storage
-            window["-table-"].update(values=get_table_values(storage))
+            window["-table-"].update(values=get_refund_table_values(storage))
     window.write_event_value("-REFUND_THREAD-", "Done")
     
 
@@ -79,7 +79,25 @@ def add_to_storage(ws: WsConnection, storage: Storage, site: str, ref: str, wind
         print("Invalid response from gateway")
         return
     # Update the table with the new storage
-    window["-table-"].update(values=get_table_values(storage.get()))
+    window["-table-"].update(values=get_refund_table_values(storage.get()))
 
 
+def get_refund_table_values(transactions: list) -> list:
+    """
+    Returns a list of rows for the refund table, or an empty list if there are no
+    transactions in storage
+    """
+    for_refund = []
+    for t in transactions:
+        try:
+            # Only AUTH and settled transactions can be refunded
+            if t.body["requesttypedescription"] == "AUTH" and t.body["settlestatus"] == "100":
+                for_refund.append([t.body["transactionreference"],
+                                t.body["transactionstartedtimestamp"],
+                                t.body["baseamount"],
+                                ])
+        except:
+            pass #TODO What shoudl happn here?
 
+    return for_refund if len(for_refund) > 0 else [
+        ['' for row in range(20)]for col in range(5)]

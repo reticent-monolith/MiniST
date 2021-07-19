@@ -2,7 +2,7 @@ import PySimpleGUI as sg
 from dotenv import load_dotenv
 import os
 
-from lib.helpers import get_table_values
+from lib.app_functions import get_refund_table_values
 
 load_dotenv()
 USER = os.environ.get("WS_USER")
@@ -73,7 +73,7 @@ def refund(user, transactions):
     """
     Layout of the refund window
     """
-    headings = [x.ljust(15) for x in ["Reference", "DateTime     ", "Amount", "Status", "Type"]]
+    headings = [x.ljust(15) for x in ["Reference", "DateTime     ", "Amount"]]
     trxs = transactions.get()
     layout = [
         #TODO remove the placeholder siteref
@@ -81,14 +81,16 @@ def refund(user, transactions):
         [sg.Text("transactionreference"), sg.Input(
             size=(30, 1), key="-input_ref-")],
         [sg.Button("Add")],
+        [sg.Text("Select a transaction and right-click > View to view more details.")],
         [sg.Table(
             key="-table-",
-            values=get_table_values(trxs),
+            values=get_refund_table_values(trxs),
             headings=headings,
             justification='center',
             num_rows=max(len(trxs), 20),
             enable_events=True,
-            change_submits=True
+            change_submits=False,
+            right_click_menu=['&Right', ['View']]
         )],
         [sg.Button("Refund"), sg.Button("Refund All")],
         [sg.Output(size=(100, 10), key="-refund_result-")],
