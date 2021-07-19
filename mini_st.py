@@ -102,6 +102,7 @@ class MiniST:
                         print(f"### Transaction {count} ###\n")
                         pprint.pprint(t.body)
                         print()
+                    print(f"Found {count} transactions")
 
     def open_refund_window(self, menu_values):
         """
