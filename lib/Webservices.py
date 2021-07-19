@@ -1,5 +1,4 @@
 import securetrading as st
-
 from models.Transaction import Transaction
 
 
@@ -32,22 +31,24 @@ class WsConnection:
         req.update(query)
         return self.api.process(req)
 
-    def refund(self, to_refund: Transaction, partial: str = "", updated: str = "") -> dict:
+    def refund(self, trx: Transaction, partial: str = "", updated: str = "") -> dict:
         """
         Process a refund through the api
         partial and updated will modify the type of refund if present (see TP docs)
         """
-        print(f"to refund: {to_refund}")
+        # Don't even contact the api if settlestatus is not 100
+        # if trx.body["settlestatus"] != "100":
+        #     return
+
         refund = {
             "requesttypedescriptions": ["REFUND"],
-            "sitereference": to_refund.site,
-            "parenttransactionreference": to_refund.ref,
+            "sitereference": trx.site,
+            "parenttransactionreference": trx.ref,
         }
         if partial != "":
-            refund["baseamount"] = to_refund.body["baseamount"]
+            refund["baseamount"] = trx.body["baseamount"]
         if updated != "":
-            refund["expirydate"] = to_refund.body["expirydate"]
+            refund["expirydate"] = trx.body["expirydate"]
         req = st.Request()
         req.update(refund)
         return self.api.process(req)
-        

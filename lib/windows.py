@@ -10,6 +10,9 @@ sg.theme("GreenMono")
 
 
 def menu():
+    """
+    The layout of the main menu window
+    """
     layout = [
         [sg.Text("Username"), sg.Input(
             USER, key="WS_USER", size=(20, 1))],
@@ -25,6 +28,9 @@ def menu():
 
 
 def transaction_query(user):
+    """
+    Layout of the transaction query window
+    """
     filter_choices = ["sitereference",
                       "transactionreference (Alpha 25 char)",
                       "accounttypedescription (Alpha 20 char)",
@@ -35,7 +41,6 @@ def transaction_query(user):
                       "requesttypedescription",
                       "pan"
                       ]
-
     layout = [
         [sg.Combo(filter_choices, key="field_0"),
          sg.Input(key="value_0", size=(30, 1))],
@@ -59,31 +64,42 @@ def transaction_query(user):
         [sg.Button("Run Query"), sg.Button("Back")],
         [sg.Text("Idle", key="_status_", size=(50, 1))]
     ]
-
     return sg.Window(f"Transaction Query for {user}", layout, modal=True)
 
 
 def refund(user, transactions):
+    """
+    Layout of the refund window
+    """
     headings = ["Reference", "DateTime", "Amount"]
-
     for_refund = []
-    for t in transactions:
+    trxs = transactions.get()
+    for t in trxs:
         for_refund.append([t.body["transactionreference"],
                           t.body["transactionstartedtimestamp"], t.body["baseamount"]])
-
+    # Handle an empty storage
+    values = for_refund if len(for_refund) > 0 else [
+        ['' for row in range(20)]for col in range(3)]
     layout = [
+        [sg.Text("sitereference"), sg.Input(size=(30, 1), key="-input_site-")],
+        [sg.Text("transactionreference"), sg.Input(
+            size=(30, 1), key="-input_ref-")],
+        [sg.Button("Add")],
         [sg.Table(
-            values=for_refund,
+            key="-table-",
+            values=values,
             headings=headings,
-            max_col_width=40,
-            auto_size_columns=True,
+            def_col_width=60,
+            max_col_width=60,
+            # auto_size_columns=True,
             justification='center',
             # alternating_row_color='lightblue',
-            num_rows=max(len(transactions), 20)
+            num_rows=max(len(trxs), 20),
+            enable_events=True,
+            change_submits=True
         )],
-        [sg.Button("Refund")],
+        [sg.Button("Refund"), sg.Button("Refund All")],
+        [sg.Output(size=(50, 8), key="-refund_result-")],
         [sg.Text("Idle", key="_status_", size=(50, 1))]
-
     ]
-
     return sg.Window(f"Refunds for {user}", layout, modal=True)

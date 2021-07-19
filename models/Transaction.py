@@ -7,5 +7,10 @@ class Transaction:
     def __init__(self, data):
         # Build dictionary of fields and values
         self.body = data
-        self.site = data["sitereference"]
-        self.ref = data["transactionreference"]
+        print(f"Creating Transaction: {data}")
+        try:
+            self.site = data["sitereference"]
+            self.ref = data["transactionreference"]
+        except KeyError:
+            print("This isn't a valid transaction")
+
