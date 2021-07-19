@@ -2,7 +2,7 @@
 from lib.app_functions import *
 from models.Storage import Storage
 from lib.Webservices import WsConnection
-import PySimpleGUI as sg
+import PySimpleGUI as PSG
 from threading import Thread
 import lib.windows as windows
 import lib.helpers as h
@@ -44,7 +44,7 @@ class MiniST:
             self.ws = WsConnection(
                 menu_values["WS_USER"], menu_values["WS_PASS"])
             # this will close the entire program
-            if menu_event in ("Quit", sg.WIN_CLOSED):
+            if menu_event in ("Quit", PSG.WIN_CLOSED):
                 break
             # save credentials
             # TODO make this work! No idea why it isn't...
@@ -75,13 +75,13 @@ class MiniST:
         window = windows.transaction_query(menu_values["WS_USER"])
         while True:
             event, values = window.read()
-            if event in (sg.WIN_CLOSED, "Back"):
+            if event in (PSG.WIN_CLOSED, "Back"):
                 window.close()
                 break
             elif event == "Clear":
                 # clear the inputs
                 for el in list(window.element_list()):
-                    if isinstance(el, sg.Input) or isinstance(el, sg.Combo):
+                    if isinstance(el, PSG.Input) or isinstance(el, PSG.Combo):
                         el.update("")
             elif event == "Run Query":
                 # clear the output
@@ -110,7 +110,8 @@ class MiniST:
         window = windows.refund(menu_values["WS_USER"], self.storage)
         while True:
             event, values = window.read()
-            if event in (sg.WIN_CLOSED, "Back"):
+            # CLose the window
+            if event in (PSG.WIN_CLOSED, "Back"):
                 window.close()
                 break
             if event == "Add":
@@ -142,7 +143,8 @@ class MiniST:
             elif event == "View":
                 selected = values["-table-"]
                 if len(selected) > 0:
-                    sg.popup(pprint.pformat(self.storage.get()[int(selected[0])].body))
+                    PSG.popup(pprint.pformat(self.storage.get()[int(selected[0])].body))
+
 
 ############
 ### Main ###
