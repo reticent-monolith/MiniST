@@ -1,6 +1,7 @@
 import unittest
 import mini_st
 
+
 class TestTransactionQuery(unittest.TestCase):
     def test_map_values_to_dict(self):
         test_values = {
@@ -11,6 +12,7 @@ class TestTransactionQuery(unittest.TestCase):
             "sitereference": [{"value": "asite12345"}]
         }
         self.assertEqual(mini_st.map_values_to_dict(test_values), expected)
+
 
 if __name__ == "__main__":
     unittest.main()
