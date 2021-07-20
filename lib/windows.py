@@ -20,7 +20,7 @@ def menu():
             USER, key="WS_USER", size=(20, 1))],
         [sg.Text("Password"), sg.Input(
             PASS, key="WS_PASS", size=(20, 1), password_char="*")],
-        [sg.Button("Save")],
+        # [sg.Button("Save")],
         [sg.Text("What would you like to do?")],
         [sg.Button('Transaction Query')],
         [sg.Button('Refund')],
@@ -44,10 +44,11 @@ def transaction_query(user):
                       "pan"
                       ]
     layout = [
+        [sg.Text("Select a field on the left (or enter your own) and enter the value.")],
         [sg.Combo(filter_choices, key="field_0"),
-         sg.Input("test_benjonesthesecond84082",key="value_0", size=(30, 1))], #TODO remove placeholder siteref
+         sg.Input(key="value_0", size=(30, 1))], 
         [sg.Combo(filter_choices, key="field_1"),
-         sg.Input("4000000000001067", key="value_1", size=(30, 1))], #TODO remove placeholder pan
+         sg.Input(key="value_1", size=(30, 1))], 
         [sg.Combo(filter_choices, key="field_2"),
          sg.Input(key="value_2", size=(30, 1))],
         [sg.Combo(filter_choices, key="field_3"),
@@ -76,8 +77,10 @@ def refund(user, transactions):
     headings = [x.ljust(15) for x in ["Reference", "DateTime     ", "Amount"]]
     trxs = transactions.get()
     layout = [
-        #TODO remove the placeholder siteref
-        [sg.Text("sitereference"), sg.Input("test_benjonesthesecond84082",size=(30, 1), key="-input_site-")],
+        [sg.Text("Enter a site reference and transaction reference to add transactions here.")],
+        [sg.Text("Alternatively, transactions that can be refunded will be imported here")],
+        [sg.Text("from a transaction query.")],
+        [sg.Text("sitereference"), sg.Input(size=(30, 1), key="-input_site-")],
         [sg.Text("transactionreference"), sg.Input(
             size=(30, 1), key="-input_ref-")],
         [sg.Button("Add")],
@@ -87,13 +90,13 @@ def refund(user, transactions):
             values=get_refund_table_values(trxs),
             headings=headings,
             justification='center',
-            num_rows=max(len(trxs), 20),
+            num_rows=20,
             enable_events=True,
-            change_submits=False,
+            change_submits=True,
             right_click_menu=['&Right', ['View']]
         )],
         [sg.Button("Refund"), sg.Button("Refund All")],
-        [sg.Output(size=(100, 10), key="-refund_result-")],
+        [sg.Output(size=(57, 5), key="-refund_result-")],
         [sg.Text("Idle", key="_status_", size=(50, 1))]
     ]
     return sg.Window(f"Refunds for {user}", layout, modal=True)
