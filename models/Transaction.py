@@ -1,10 +1,10 @@
 class Transaction:
     """
     A model of a transaction for requests to and responses from the API
-    Takes tuple pairs of field and value
+    Takes a dict recieved from the API
     """
 
-    def __init__(self, data):
+    def __init__(self, data: dict):
         # Build dictionary of fields and values
         self.body = data
         try:
