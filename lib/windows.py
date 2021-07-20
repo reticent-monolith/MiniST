@@ -87,9 +87,9 @@ def refund(user, transactions):
             values=get_refund_table_values(trxs),
             headings=headings,
             justification='center',
-            num_rows=max(len(trxs), 20),
+            num_rows=20,
             enable_events=True,
-            change_submits=False,
+            change_submits=True,
             right_click_menu=['&Right', ['View']]
         )],
         [sg.Button("Refund"), sg.Button("Refund All")],
